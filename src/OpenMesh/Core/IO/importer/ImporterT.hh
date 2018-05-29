@@ -319,6 +319,10 @@ public:
 
   virtual void add_face_texcoords( FaceHandle _fh, VertexHandle _vh, const std::vector<Vec2f>& _face_texcoords)
   {
+    // Make sure that the texcoordinates collected match the size of the face
+    // Otherwise we try to assign more texcoords then necessary
+    assert(mesh_.valence(_fh) == _face_texcoords.size() );
+
     // get first halfedge handle
     HalfedgeHandle cur_heh   = mesh_.halfedge_handle(_fh);
     HalfedgeHandle end_heh   = mesh_.prev_halfedge_handle(cur_heh);
@@ -336,9 +340,15 @@ public:
 
   virtual void add_face_texcoords( FaceHandle _fh, VertexHandle _vh, const std::vector<Vec3f>& _face_texcoords)
   {
+    // Make sure that the texcoordinates collected match the size of the face
+    // Otherwise we try to assign more texcoords then necessary
+    assert(mesh_.valence(_fh) == _face_texcoords.size() );
+
+
     // get first halfedge handle
     HalfedgeHandle cur_heh   = mesh_.halfedge_handle(_fh);
     HalfedgeHandle end_heh   = mesh_.prev_halfedge_handle(cur_heh);
+
 
     // find start heh
     while( mesh_.to_vertex_handle(cur_heh) != _vh && cur_heh != end_heh )
