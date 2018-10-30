@@ -40,69 +40,173 @@
  * ========================================================================= */
 
 /*===========================================================================*\
- *                                                                           *             
+ *                                                                           *
  *   $Revision$                                                         *
  *   $Date$                   *
  *                                                                           *
 \*===========================================================================*/
 
-/** \file config.h
- *  \todo Move content to config.hh and include it to be compatible with old
- *  source.
- */
+#define OPENMESH_SMARTTAGGERT_C
 
-//=============================================================================
+//== INCLUDES =================================================================
 
-#ifndef OPENMESH_CONFIG_H
-#define OPENMESH_CONFIG_H
+#include "SmartTaggerT.hh"
 
-//=============================================================================
+#include <iostream>
+#include <limits>
 
-#include <assert.h>
-#include <OpenMesh/Core/System/compiler.hh>
-#include <OpenMesh/Core/System/OpenMeshDLLMacros.hh>
+//== NAMESPACES ===============================================================
 
-// ----------------------------------------------------------------------------
+namespace OpenMesh {
+
+//== IMPLEMENTATION ==========================================================
+
+template <class Mesh, class EHandle, class EPHandle>
+SmartTaggerT<Mesh, EHandle, EPHandle>::
+SmartTaggerT(Mesh& _mesh, unsigned int _tag_range)
+  : mesh_(_mesh),
+    current_base_(0),
+    tag_range_(_tag_range)
+{
+  // add new property
+  mesh_.add_property(ep_tag_);
+  
+  // reset all tags once
+  all_tags_to_zero();
+}
 
 
-#define OM_VERSION 0x80000
-//#define OM_VERSION 0x70200
+//-----------------------------------------------------------------------------
 
-#define OM_GET_VER ((OM_VERSION & 0xf0000) >> 16)
-#define OM_GET_MAJ ((OM_VERSION & 0x0ff00) >> 8)
-#define OM_GET_MIN  (OM_VERSION & 0x000ff)
+ 
+template <class Mesh, class EHandle, class EPHandle>
+SmartTaggerT<Mesh, EHandle, EPHandle>::
+~SmartTaggerT()
+{
+  mesh_.remove_property(ep_tag_);
+}
 
-#ifdef WIN32
-#  ifdef min
-#    pragma message("Detected min macro! OpenMesh does not compile with min/max macros active! Please add a define NOMINMAX to your compiler flags or add #undef min before including OpenMesh headers !")
-#    error min macro active 
-#  endif
-#  ifdef max
-#    pragma message("Detected max macro! OpenMesh does not compile with min/max macros active! Please add a define NOMINMAX to your compiler flags or add #undef max before including OpenMesh headers !")
-#    error max macro active 
-#  endif
+
+//-----------------------------------------------------------------------------
+
+
+template <class Mesh, class EHandle, class EPHandle>
+void
+SmartTaggerT<Mesh, EHandle, EPHandle>::
+untag_all()
+{
+  unsigned int max_uint = std::numeric_limits<unsigned int>::max();
+
+  if( current_base_ < max_uint - 2*tag_range_)
+    current_base_ += tag_range_;
+  else
+  {
+    //overflow -> reset all tags
+#ifdef STV_DEBUG_CHECKS
+    std::cerr << "Tagging Overflow occured...\n";
+#endif
+    current_base_ = 0;
+    all_tags_to_zero();
+  }
+}
+
+
+//-----------------------------------------------------------------------------
+
+
+template <class Mesh, class EHandle, class EPHandle>
+void
+SmartTaggerT<Mesh, EHandle, EPHandle>::
+untag_all( const unsigned int _new_tag_range)
+{
+  set_tag_range(_new_tag_range);
+}
+
+
+//-----------------------------------------------------------------------------
+  
+template <class Mesh, class EHandle, class EPHandle>
+void
+SmartTaggerT<Mesh, EHandle, EPHandle>::
+set_tag  ( const EHandle _eh, unsigned int _tag)
+{
+#ifdef STV_DEBUG_CHECKS
+  if( _tag > tag_range_)
+    std::cerr << "ERROR in set_tag tag range!!!\n";
 #endif
 
-#if defined(_MSC_VER)
-#  define OM_DEPRECATED(msg) __declspec(deprecated(msg))
-#elif defined(__GNUC__)
-#  if (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__) >= 40500 /* Test for GCC >= 4.5.0 */
-#    define OM_DEPRECATED(msg) __attribute__ ((deprecated(msg)))
-#  else
-#    define OM_DEPRECATED(msg) __attribute__ ((deprecated))
-#  endif
-#elif defined(__clang__)
-#  define OM_DEPRECATED(msg) __attribute__ ((deprecated(msg)))
-#else
-#  define OM_DEPRECATED(msg)
+  mesh_.property(ep_tag_, _eh) = current_base_ + _tag;
+}
+
+
+//-----------------------------------------------------------------------------
+
+
+template <class Mesh, class EHandle, class EPHandle>
+unsigned int
+SmartTaggerT<Mesh, EHandle, EPHandle>::
+get_tag  ( const EHandle _eh) const
+{
+  unsigned int t = mesh_.property(ep_tag_, _eh);
+
+#ifdef STV_DEBUG_CHECKS
+  if( t > current_base_ + tag_range_)
+    std::cerr << "ERROR in get_tag tag range!!!\n";
 #endif
 
-typedef unsigned int uint;
+  if( t<= current_base_) return 0;
+  else                   return t-current_base_;
+}
 
-#if ((defined(_MSC_VER) && (_MSC_VER >= 1800)) || __cplusplus > 199711L || defined(__GXX_EXPERIMENTAL_CXX0X__))
-#define OM_HAS_HASH
-#endif
+
+//-----------------------------------------------------------------------------
+
+
+template <class Mesh, class EHandle, class EPHandle>
+bool
+SmartTaggerT<Mesh, EHandle, EPHandle>::
+is_tagged( const EHandle _eh) const
+{
+  return bool(get_tag(_eh));
+}
+
+
+//-----------------------------------------------------------------------------
+
+
+template <class Mesh, class EHandle, class EPHandle>
+void
+SmartTaggerT<Mesh, EHandle, EPHandle>::
+set_tag_range( const unsigned int _tag_range)
+{
+  if( _tag_range <= tag_range_)
+  {
+    untag_all();
+    tag_range_ = _tag_range;
+  }
+  else
+  {
+    tag_range_ = _tag_range;
+    untag_all();
+  }
+}
+
+  
+//-----------------------------------------------------------------------------
+
+
+template <class Mesh, class EHandle, class EPHandle>
+void
+SmartTaggerT<Mesh, EHandle, EPHandle>::
+all_tags_to_zero()
+{
+  // iterate over property vector
+  for(unsigned int i=0; i<mesh_.property(ep_tag_).n_elements(); ++i)
+  {
+    mesh_.property(ep_tag_)[i] = 0;
+  }
+}
 
 //=============================================================================
-#endif // OPENMESH_CONFIG_H defined
+} // namespace OpenMesh
 //=============================================================================

@@ -7,16 +7,48 @@
 <!-- --------------------------------------------------------------------- -->
 
 
-<tr valign=top><td><b>7.1</b> (?/?/?)</td><td>
+<tr valign=top><td><b>8.0</b> (?/?/?)</td><td>
 
-b>IO</b>
+<b>Core</b>
 <ul>
-<li>Fixed slow OBJ reader (Thanks to Etienne Danvoye for the patch) </li>
+<li>TriConnectivity: Added two functions split_edge and split_edge_copy to mask the PolyConnectivity functions of the same name (Prevents creation of valence 2 vertices on trimeshes)</li>
 </ul>
 
+<b>IO</b>
+<ul>
+<li>PLY Reader: Allowing the PLY reader to read custom face ( Thanks to morgan Leborgne for the patch)</li>
+<li>PLY Reader: Fixed endless loop on unknown property list type</li>
+</ul>
+
+<b>Tools</b>
+<ul>
+<li>SmartTagger: Added the SmartTagger class to tag primitives (O(1) reset )</li>
+</ul>
 
 <b>Build System</b>
 <ul>
+<li>Rename the DEPRECATED macro into OM_DEPRECATED to prevent a macro clash with Intel MKL (Thanks to Morgan Leborgne for the patch)</li>
+</ul>
+
+
+</tr>
+
+
+<tr valign=top><td><b>7.1</b> (2018/05/29)</td><td>
+
+<b>IO</b>
+<ul>
+<li>OBJ Reader: Fixed slow OBJ reader (Thanks to Etienne Danvoye for the patch) </li>
+</ul>
+
+<b>Documentation</b>
+<ul>
+<li>Updated build instructions.</li>
+</ul>
+
+<b>Build System</b>
+<ul>
+<li>Default to C++11 in cmake files</li>
 <li>Remove old qmake project files. Unmaintained for a very long time</li>
 <li>Replaced Qt finders</li>
 <li>Added VS 2017 to CI builds</li>

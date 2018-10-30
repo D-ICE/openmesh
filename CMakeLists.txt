@@ -1,4 +1,9 @@
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
+
+
+# Set and enforce C++-11 flags
+set( CMAKE_CXX_STANDARD_REQUIRED TRUE )
+set( CMAKE_CXX_STANDARD 11 )
 
 enable_testing()
 

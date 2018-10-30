@@ -16,35 +16,19 @@ IF "%SHARED%" == "TRUE" (
   set STRING_DLL=
 )
 
-IF "%BUILD_PLATFORM%" == "VS2012" (
-    set LIBPATH=E:\libs\VS2012
-    set GTESTVERSION=gtest-1.6.0
-    set GENERATOR=Visual Studio 11%ARCH_VS%
-    set VS_PATH="C:\Program Files (x86)\Microsoft Visual Studio 11.0\Common7\IDE\devenv.com"
-    IF "%ARCHITECTURE%" == "x64" (
-      set QT_INSTALL_PATH=E:\Qt\4.8.5-vs2012-%STRING_ARCH%\
-      set QT_BASE_CONFIG=-DQT_QMAKE_EXECUTABLE=E:\Qt\4.8.5-vs2012-%STRING_ARCH%\bin\qmake.exe
-    )
-
-    IF "%ARCHITECTURE%" == "x32" (
-      set QT_INSTALL_PATH=E:\Qt\4.8.5-vs2012-%STRING_ARCH%\
-      set QT_BASE_CONFIG=-DQT_QMAKE_EXECUTABLE=E:\Qt\4.8.5-vs2012-%STRING_ARCH%\bin\qmake.exe 
-    )
-) 
-
 IF "%BUILD_PLATFORM%" == "VS2013" (
     set LIBPATH=E:\libs\VS2013
     set GTESTVERSION=gtest-1.6.0
     set GENERATOR=Visual Studio 12%ARCH_VS%
     set VS_PATH="C:\Program Files (x86)\Microsoft Visual Studio 12.0\Common7\IDE\devenv.com"
     IF "%ARCHITECTURE%" == "x64" (
-      set QT_INSTALL_PATH=E:\Qt\Qt5.3.1-vs2013-%STRING_ARCH%\5.3\msvc2013_64_opengl
-      set QT_BASE_CONFIG=-DQT5_INSTALL_PATH=E:\Qt\Qt5.3.1-vs2013-%STRING_ARCH%\5.3\msvc2013_64_opengl
+      set QT_INSTALL_PATH=E:\Qt\Qt5.7.0\5.7\msvc2013_64
+      set QT_BASE_CONFIG=-DQT5_INSTALL_PATH=E:\Qt\Qt5.7.0\5.7\msvc2013_64
     )
 
     IF "%ARCHITECTURE%" == "x32" (
-      set QT_INSTALL_PATH=E:\Qt\Qt5.3.1-vs2013-%STRING_ARCH%\5.3\msvc2013_opengl
-      set QT_BASE_CONFIG=-DQT5_INSTALL_PATH=E:\Qt\Qt5.3.1-vs2013-%STRING_ARCH%\5.3\msvc2013_opengl
+      set QT_INSTALL_PATH=E:\Qt\Qt5.7.0\5.7\msvc2013
+      set QT_BASE_CONFIG=-DQT5_INSTALL_PATH=E:\Qt\Qt5.7.0\5.7\msvc2013
     )
 ) 
 
@@ -83,10 +67,15 @@ IF "%BUILD_PLATFORM%" == "VS2017" (
 IF "%APPS%" == "ON" (
   set STRING_APPS=
 
+  ECHO "Copying Platform plugins from %QT_INSTALL_PATH%\plugins\platforms to Build\plugins\platforms"
+  
+
+  
   REM Create the platform plugins subdirectory for the qt plugins required to run the gui apps
+  mkdir Build
   mkdir Build\plugins
   mkdir Build\plugins\platforms
-
+  
   REM Copy the platform plugins subdirectory for the qt plugins required to run the gui apps
   xcopy /Y %QT_INSTALL_PATH%\plugins\platforms Build\plugins\platforms 
   set CMAKE_CONFIGURATION=%QT_BASE_CONFIG%
@@ -95,9 +84,13 @@ IF "%APPS%" == "ON" (
   set CMAKE_CONFIGURATION=
 )
 
+
+
+
 ECHO "============================================================="
 ECHO "============================================================="
 ECHO "Building with :"
+whoami
 ECHO "ARCHITECTURE        : %ARCHITECTURE%"
 ECHO "BUILD_PLATFORM      : %BUILD_PLATFORM%"
 ECHO "GTESTVERSION        : %GTESTVERSION%"
@@ -110,7 +103,23 @@ ECHO "QT_INSTALL_PATH     : %QT_INSTALL_PATH%"
 ECHO "CMAKE_CONFIGURATION : %CMAKE_CONFIGURATION%"
 ECHO "============================================================="
 ECHO "============================================================="
+ECHO ""
+ECHO "Running Build environment checks"
 
+IF EXIST %LIBPATH%\ (
+  ECHO "LIBPATH ... Ok"
+) ELSE (
+  ECHO "LIBPATH not found!"
+  exit 10;
+)
+
+
+IF EXIST %QT_INSTALL_PATH%\ (
+  ECHO "QT_INSTALL_PATH ... Ok"
+) ELSE (
+  ECHO "QT_INSTALL_PATH: %QT_INSTALL_PATH%\ not found!"
+  exit 10;
+)
 
 
 "C:\Program Files\CMake\bin\cmake.exe" -DGTEST_PREFIX="%LIBPATH%\%ARCHITECTURE%\%GTESTVERSION%" -G "%GENERATOR%"  -DCMAKE_BUILD_TYPE=Release -DBUILD_APPS=%APPS% -DOPENMESH_BUILD_UNIT_TESTS=TRUE -DCMAKE_WINDOWS_LIBS_DIR="e:\libs" -DOPENMESH_BUILD_SHARED=%SHARED% %CMAKE_CONFIGURATION% ..
