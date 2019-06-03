@@ -161,7 +161,7 @@ PolyMeshT<Kernel>::calc_face_normal_impl(FaceHandle, PointIsNot3DTag) const
   assert(false);
 
   Normal normal;
-  vectorize(normal,Scalar(0));
+  vectorize(normal,0);
   return normal;
 }
 
