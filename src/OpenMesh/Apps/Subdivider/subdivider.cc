@@ -70,7 +70,7 @@ typedef Uniform::LoopT< Mesh >                               Loop;
 typedef Uniform::CompositeSqrt3T< CMesh >                    CompositeSqrt3;
 typedef Uniform::CompositeLoopT< CMesh >                     CompositeLoop;
 typedef Uniform::InterpolatingSqrt3LGT< Mesh >               InterpolatingSqrt3LG;
-typedef Uniform::ModifiedButterflyT< Mesh, float >           ModifiedButterfly;
+typedef Uniform::ModifiedButterflyT< Mesh >                  ModifiedButterfly;
 typedef Uniform::CatmullClarkT< Mesh >                       CatmullClark;
 
 using OpenMesh::Utils::Timer;
