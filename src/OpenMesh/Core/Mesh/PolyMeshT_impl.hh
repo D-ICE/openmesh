@@ -404,7 +404,7 @@ template <class Kernel>
 void PolyMeshT<Kernel>::
 calc_vertex_normal_fast(VertexHandle _vh, Normal& _n) const
 {
-  vectorize(_n, 0);
+  vectorize(_n, Scalar(0.0));
   for (ConstVertexFaceIter vf_it = this->cvf_iter(_vh); vf_it.is_valid(); ++vf_it)
     _n += this->normal(*vf_it);
 }
@@ -414,7 +414,7 @@ template <class Kernel>
 void PolyMeshT<Kernel>::
 calc_vertex_normal_correct(VertexHandle _vh, Normal& _n) const
 {
-  vectorize(_n, 0);
+  vectorize(_n, Scalar(0.0));
   ConstVertexIHalfedgeIter cvih_it = this->cvih_iter(_vh);
   if (! cvih_it.is_valid() )
   {//don't crash on isolated vertices
