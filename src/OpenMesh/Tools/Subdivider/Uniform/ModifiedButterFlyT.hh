@@ -503,7 +503,7 @@ private: // geometry helper
         }
         else //at least one endpoint is [irregular and not in boundary]
         {
-          RealType normFactor = static_cast<RealType>(0.0);
+          Scalar normFactor = static_cast<RealType>(0.0);
 
             if(valence_a_0!=6 && !_m.is_boundary(a_0))
             {
